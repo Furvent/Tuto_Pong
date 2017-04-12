@@ -11,11 +11,11 @@
 var canvas;
 var canvasContext;
 
-const NORMAL_Y_SPEED = 10;
-const FAST_Y_SPEED = 15;
-const VFAST_Y_SPEED = 20;
+const NORMAL_X_SPEED = 10;
+const FAST_X_SPEED = 15;
+const VFAST_X_SPEED = 20;
 var ballX = 0, ballY = 75;
-var ballSpeedX = 5, ballSpeedY = NORMAL_Y_SPEED;
+var ballSpeedX = NORMAL_X_SPEED, ballSpeedY = 5;
 
 const PADDLE_HEIGHT = 100;
 const PADDLE_THICKNESS = 10;
@@ -93,10 +93,9 @@ function drawUI(){
 function moveBall() {
     if (ballX < PADDLE_THICKNESS) {
         if (ballY > leftPlayerY && ballY < leftPlayerY + PADDLE_HEIGHT) {
-            ballSpeedX++;
-            ballSpeedX *= -1;
-            ballSpeedY = changeBallSpeedYWhenTouchingPaddle(leftPlayerY);
-            console.log("Vitesse Y de la balle = " + ballSpeedY);
+            ballSpeedX = changeBallSpeedYWhenTouchingPaddle(leftPlayerY);
+            console.log("test");
+            console.log(ballSpeedX);
         } else {
             if (ballX < 0) {
                 rightPlayerScore++;
@@ -105,10 +104,8 @@ function moveBall() {
         }
     } else if (ballX > canvas.width - PADDLE_THICKNESS) {
         if (ballY > rightPlayerY && ballY < rightPlayerY + PADDLE_HEIGHT) {
-            ballSpeedX++;
+            ballSpeedX = changeBallSpeedYWhenTouchingPaddle(rightPlayerY);
             ballSpeedX *= -1;
-            ballSpeedY = changeBallSpeedYWhenTouchingPaddle(rightPlayerY);
-            console.log("Vitesse Y de la balle = " + ballSpeedY);
         } else {
             if (ballX > canvas.width) {
                 leftPlayerScore++;
@@ -132,12 +129,12 @@ function changeBallSpeedYWhenTouchingPaddle(playerY) {
     const PADDLE_PART = PADDLE_HEIGHT / 5;
     // On simule 5 parties distinctes sur le paddle :
     if (whereBallTouchedPaddleY < PADDLE_PART || whereBallTouchedPaddleY >= PADDLE_PART*4) { // Si tout en haut ou tout en bas.
-        return VFAST_Y_SPEED;
+        return VFAST_X_SPEED;
     } else if ((whereBallTouchedPaddleY >= PADDLE_PART && whereBallTouchedPaddleY < PADDLE_PART * 2) // Si au dessus,
             || (whereBallTouchedPaddleY < PADDLE_PART * 4 && whereBallTouchedPaddleY >= PADDLE_PART * 3)) { // ou en dessous du mileu.
-        return FAST_Y_SPEED;
+        return FAST_X_SPEED;
     } else { // Milieu
-        return NORMAL_Y_SPEED;
+        return NORMAL_X_SPEED;
     }
 
 }
@@ -145,8 +142,8 @@ function changeBallSpeedYWhenTouchingPaddle(playerY) {
 function ballReset() {
     ballX = canvas.width/2;
     ballY = canvas.height/2;
-    ballSpeedY = NORMAL_Y_SPEED;
-    ballSpeedX = 5;
+    ballSpeedY = 5;
+    ballSpeedX = NORMAL_X_SPEED;
 }
 
 function calculateMousePos(evt) {
