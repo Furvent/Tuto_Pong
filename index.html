@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+<script>
+
+var canvas;
+var canvasContext;
+
+const NORMAL_Y_SPEED = 10;
+const FAST_Y_SPEED = 15;
+const VFAST_Y_SPEED = 20;
+var ballX = 0, ballY = 75;
+var ballSpeedX = 5, ballSpeedY = NORMAL_Y_SPEED;
+
+const PADDLE_HEIGHT = 100;
+const PADDLE_THICKNESS = 10;
+
+const LEFT_PLAYER_X = 0;
+var leftPlayerY = 0;
+
+var RIGHT_PLAYER_X = 0;
+var rightPlayerY = 0;
+const COMPUTER_SPEED = 12;
+const COMPUTER_SIGHT = 35;
+
+var leftPlayerScore = 0;
+var rightPlayerScore = 0;
+
+window.onload = function() {
+    console.log("Hello planet !");
+    canvas = document.getElementById('gameCanvas');
+    canvasContext = canvas.getContext('2d');
+
+    // COMPUTER
+    RIGHT_PLAYER_X = canvas.width - 10;
+    rightPlayerY = 250;
+
+    canvas.addEventListener('mousemove', function(evt) {
+        var mousePos = calculateMousePos(evt);
+        leftPlayerY = mousePos.y - (PADDLE_HEIGHT / 2);
+        //rightPlayerY = mousePos.y - (PADDLE_HEIGHT / 2);
+    });
+
+    var framesPerSecond = 30;
+    setInterval(function() {
+        moveEverything();
+        drawEverything();
+        drawUI();
+    }, 1000/framesPerSecond);
+};
+
+function drawEverything() {
+    drawBackground();
+    drawWhiteCircle();
+    drawPlayer(); // Left.
+    drawPlayer(); // Right.
+}
+
+function moveEverything() {
+    moveBall();
+    moveComputerPaddle();
+}
+
+function drawBackground() {
+    canvasContext.fillStyle = 'black';
+    canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawWhiteCircle() {
+    canvasContext.fillStyle = 'white';
+    canvasContext.beginPath();
+    canvasContext.arc(ballX, ballY, 10, 0, Math.PI*2, true);
+    canvasContext.fill();
+}
+
+function drawPlayer() {
+    canvasContext.fillStyle = 'white';
+    canvasContext.fillRect(LEFT_PLAYER_X, leftPlayerY, PADDLE_THICKNESS, PADDLE_HEIGHT); // Left.
+    canvasContext.fillRect(RIGHT_PLAYER_X, rightPlayerY, PADDLE_THICKNESS, PADDLE_HEIGHT); // Right.
+}
+
+function drawUI(){
+    canvasContext.font = '15px Arial';
+    canvasContext.fillText("Score : " + leftPlayerScore, 10, 30);
+    canvasContext.fillText("Score : " + rightPlayerScore, canvas.width - 70, 30);
+}
+
+function moveBall() {
+    if (ballX < PADDLE_THICKNESS) {
+        if (ballY > leftPlayerY && ballY < leftPlayerY + PADDLE_HEIGHT) {
+            ballSpeedX++;
+            ballSpeedX *= -1;
+            ballSpeedY = changeBallSpeedYWhenTouchingPaddle(leftPlayerY);
+            console.log("Vitesse Y de la balle = " + ballSpeedY);
+        } else {
+            if (ballX < 0) {
+                rightPlayerScore++;
+                ballReset();
+            }
+        }
+    } else if (ballX > canvas.width - PADDLE_THICKNESS) {
+        if (ballY > rightPlayerY && ballY < rightPlayerY + PADDLE_HEIGHT) {
+            ballSpeedX++;
+            ballSpeedX *= -1;
+            ballSpeedY = changeBallSpeedYWhenTouchingPaddle(rightPlayerY);
+            console.log("Vitesse Y de la balle = " + ballSpeedY);
+        } else {
+            if (ballX > canvas.width) {
+                leftPlayerScore++;
+                ballReset();
+            }
+        }
+    }
+    ballX += ballSpeedX;
+
+    if (ballY > canvas.height) {
+        ballSpeedY *= -1;
+    } else if (ballY < 0) {
+        ballSpeedY *= -1;
+    }
+    ballY += ballSpeedY;
+    //console.log("ballX is now : " + ballX + " and is at " + ballSpeedX + " speed.");
+}
+
+function changeBallSpeedYWhenTouchingPaddle(playerY) {
+    var whereBallTouchedPaddleY = ballY - playerY;
+    const PADDLE_PART = PADDLE_HEIGHT / 5;
+    // On simule 5 parties distinctes sur le paddle :
+    if (whereBallTouchedPaddleY < PADDLE_PART || whereBallTouchedPaddleY >= PADDLE_PART*4) { // Si tout en haut ou tout en bas.
+        return VFAST_Y_SPEED;
+    } else if ((whereBallTouchedPaddleY >= PADDLE_PART && whereBallTouchedPaddleY < PADDLE_PART * 2) // Si au dessus,
+            || (whereBallTouchedPaddleY < PADDLE_PART * 4 && whereBallTouchedPaddleY >= PADDLE_PART * 3)) { // ou en dessous du mileu.
+        return FAST_Y_SPEED;
+    } else { // Milieu
+        return NORMAL_Y_SPEED;
+    }
+
+}
+
+function ballReset() {
+    ballX = canvas.width/2;
+    ballY = canvas.height/2;
+    ballSpeedY = NORMAL_Y_SPEED;
+    ballSpeedX = 5;
+}
+
+function calculateMousePos(evt) {
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+
+    var mouseX = evt.clientX - rect.left - root.scrollLeft;
+    var mouseY = evt.clientY - rect.top - root.scrollTop;
+
+    return {
+        x: mouseX,
+        y: mouseY
+    };
+}
+
+function moveComputerPaddle() {
+    var absPaddleCenter = rightPlayerY + (PADDLE_HEIGHT / 2);
+    if (ballY - absPaddleCenter < - COMPUTER_SIGHT) {
+        rightPlayerY -= COMPUTER_SPEED;
+    } else if (ballY - absPaddleCenter > COMPUTER_SIGHT){
+        rightPlayerY += COMPUTER_SPEED;
+    }
+}
+</script>
+
+</body>
+</html>
