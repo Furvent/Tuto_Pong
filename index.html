@@ -23,12 +23,12 @@ var leftPlayerY = 0;
 
 var RIGHT_PLAYER_X = 0;
 var rightPlayerY = 0;
-const COMPUTER_SPEED = 12;
+const COMPUTER_SPEED = 12.5;
 const COMPUTER_SIGHT = 35;
 
 var leftPlayerScore = 0;
 var rightPlayerScore = 0;
-const SCORE_TO_WIN = 1;
+const SCORE_TO_WIN = 3;
 
 var isPause = false;
 var isMatchFinished = false;
@@ -72,6 +72,7 @@ window.onload = function() {
 function drawEverything() {
     if (!isMatchFinished) {
         drawBackground();
+        drawNet();
         drawWhiteCircle();
         drawPlayer(); // Left.
         drawPlayer(); // Right.
@@ -99,6 +100,13 @@ function drawPlayer() {
     canvasContext.fillStyle = 'white';
     canvasContext.fillRect(LEFT_PLAYER_X, leftPlayerY, PADDLE_THICKNESS, PADDLE_HEIGHT); // Left.
     canvasContext.fillRect(RIGHT_PLAYER_X, rightPlayerY, PADDLE_THICKNESS, PADDLE_HEIGHT); // Right.
+}
+
+function drawNet() {
+    for (var i = 0; i <= canvas.height; i+=40) {
+        canvasContext.fillStyle = 'white';
+        canvasContext.fillRect((canvas.width / 2) - 1, i + 10, 2, 20);
+    }
 }
 
 function drawUI(){
@@ -266,6 +274,9 @@ function drawWinner(winner) {
     canvasContext.font = '80px Arial';
     canvasContext.textAlign = 'center';
     canvasContext.fillText(winner + " wins !", canvas.width / 2, canvas.height / 2);
+    canvasContext.font = '20px Arial';
+    canvasContext.textAlign = 'center';
+    canvasContext.fillText("Click to play again", canvas.width / 2, canvas.height / 2 + 50);
 }
 </script>
 
