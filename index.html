@@ -23,11 +23,15 @@ var leftPlayerY = 0;
 
 var RIGHT_PLAYER_X = 0;
 var rightPlayerY = 0;
-const COMPUTER_SPEED = 15;
+const COMPUTER_SPEED = 12;
 const COMPUTER_SIGHT = 35;
 
 var leftPlayerScore = 0;
 var rightPlayerScore = 0;
+const SCORE_TO_WIN = 1;
+
+var isPause = false;
+var isMatchFinished = false;
 
 window.onload = function() {
     console.log("Hello planet !");
@@ -46,20 +50,32 @@ window.onload = function() {
         leftPlayerY = mousePos.y - (PADDLE_HEIGHT / 2);
         //rightPlayerY = mousePos.y - (PADDLE_HEIGHT / 2);
     });
+    canvas.addEventListener('click', function() {
+        if (isMatchFinished) {
+            isMatchFinished = false;
+            isPause = false;
+            newRound();
+            ballReset();
+        }
+    })
 
     var framesPerSecond = 30;
     setInterval(function() {
-        moveEverything();
+        if (!isPause) {
+            moveEverything();
+        }
         drawEverything();
         drawUI();
     }, 1000/framesPerSecond);
 };
 
 function drawEverything() {
-    drawBackground();
-    drawWhiteCircle();
-    drawPlayer(); // Left.
-    drawPlayer(); // Right.
+    if (!isMatchFinished) {
+        drawBackground();
+        drawWhiteCircle();
+        drawPlayer(); // Left.
+        drawPlayer(); // Right.
+    }
 }
 
 function moveEverything() {
@@ -86,6 +102,8 @@ function drawPlayer() {
 }
 
 function drawUI(){
+    canvasContext.textAlign = 'start';
+    canvasContext.fillStyle = 'white';
     canvasContext.font = '15px Arial';
     canvasContext.fillText("Score : " + leftPlayerScore, 10, 30);
     canvasContext.fillText("Score : " + rightPlayerScore, canvas.width - 70, 30);
@@ -98,6 +116,9 @@ function moveBall() {
         } else {
             if (ballX < 0) {
                 rightPlayerScore++;
+                if (isRoundFinished()) {
+                    showWinner();
+                }
                 ballReset();
             }
         }
@@ -108,6 +129,9 @@ function moveBall() {
         } else {
             if (ballX > canvas.width) {
                 leftPlayerScore++;
+                if (isRoundFinished()) {
+                    showWinner();
+                }
                 ballReset();
             }
         }
@@ -128,19 +152,19 @@ function changeBallSpeedYWhenTouchingPaddle(playerY) {
     const PADDLE_PART = PADDLE_HEIGHT / 5; // On simule 5 parties distinctes sur le paddle :
     if (whereBallTouchePaddleY < PADDLE_PART || whereBallTouchePaddleY >= PADDLE_PART*4) { // Si tout à gauche,
         console.log("part:" + whereBallTouchePaddleY + ". It's VFAST zone.");
-        ballSpeedY = 15
-        ballSpeedX = 20
+        ballSpeedY = 15;
+        ballSpeedX = 20;
 
     } else if ((whereBallTouchePaddleY >= PADDLE_PART && whereBallTouchePaddleY < PADDLE_PART * 2) // Si juste à gauche,
         || (whereBallTouchePaddleY < PADDLE_PART * 4 && whereBallTouchePaddleY >= PADDLE_PART * 3)) { // ou juste à droite du mileu.
         console.log("part:" + whereBallTouchePaddleY + ". It's FAST zone.");
-        ballSpeedY = 10
-        ballSpeedX = 20
+        ballSpeedY = 10;
+        ballSpeedX = 20;
 
     } else { // Milieu
         console.log("part:" + whereBallTouchePaddleY + ". It's NORMAL zone.");
-        ballSpeedY = 5
-        ballSpeedX = 20
+        ballSpeedY = 5;
+        ballSpeedX = 20;
     }
     // Si la balle touche la partie gauche de paddle et se déplace de la gauche vers la droite,
     // on veut qu'elle se déplace de la droite vers la gauche.
@@ -156,8 +180,8 @@ function changeBallSpeedYWhenTouchingPaddle(playerY) {
 function ballReset() {
     ballX = canvas.width/2;
     ballY = canvas.height/2;
-    ballSpeedY = 5;
-    ballSpeedX = 5;
+    ballSpeedY = 3;
+    ballSpeedX = 10;
     if (Math.random() < 0.5) {
         ballSpeedY *= -1;
     }
@@ -212,6 +236,36 @@ function isBallCollidePaddle(playerX, playerY){
 
     // Pour les angles.
     return (dx * dx + dy * dy <= (circle.r * circle.r));
+}
+
+function newRound() {
+    leftPlayerScore = rightPlayerScore = 0;
+    ballReset();
+}
+function isRoundFinished() {
+    if (leftPlayerScore >= SCORE_TO_WIN || rightPlayerScore >= SCORE_TO_WIN) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function showWinner() {
+    isPause = true;
+    isMatchFinished = true;
+    if (leftPlayerScore >= SCORE_TO_WIN) {
+        drawWinner("Human");
+    } else {
+        drawWinner("Computer");
+    }
+}
+
+function drawWinner(winner) {
+    drawBackground();
+    canvasContext.fillStyle = 'white';
+    canvasContext.font = '80px Arial';
+    canvasContext.textAlign = 'center';
+    canvasContext.fillText(winner + " wins !", canvas.width / 2, canvas.height / 2);
 }
 </script>
 
